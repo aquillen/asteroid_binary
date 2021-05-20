@@ -1,0 +1,4 @@
+mass ratio 0.1
+
+a1 : bare tidal semi=3
+b1 : inward migration BYORP itaua=-2.0e-5 semi=4
