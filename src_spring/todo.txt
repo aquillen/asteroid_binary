@@ -1,0 +1,10 @@
+need a new routine to give orbital elements for two resolved bodies
+Maybe make it general to work on 2 point masses or 1 point mass and 1 resolved
+or 2 resolveds
+compute_semi in spring.c
+Done: it is called orbels_twobodies()
+
+modify dodrift_bin so that can drift either 2 point masses, 1 point mass
+1 resolved or 2 resolveds
+
+I wrote a new routine  dodrift_twores which will drift both resolved bodies

@@ -1,0 +1,74 @@
+
+glPointSize(10.*data->retina); 
+changed Point size here 15 to 10 2/20/17
+
+I got lightdir to be passed to sphere_shader 2/19/17
+this can be rotated inside shader using mvp matrix
+I tried this but light still rotates
+no joy on fixing lighting
+
+I got rotations to work ! 2/18/17
+mouse rotation is now overwriden but you can go into rotating frame with Z
+keystroke
+
+Rotations seem to be in data->view
+quaternions? look at mouse drag
+lighting moves with mouse rotation
+lighting only seems to be set in the shader for the spheres
+If we rotate the view, then the lighting is going to be screwed up
+is it possible to set the lighting direction by passing it to the shader?
+
+
+I got the springs to show! yay
+
+lots of differences in opengl 3.3 
+We need to use a shader
+Not only that everything is passed to displayer indirectly
+Particles are not actually available, instead they are somehow
+passed through a shader program
+and through a data structure
+
+in rebound.h struct reb_simulation  now has
+       int NS; //ACQ number of springs
+       int *springs_ii;  // ACQ  pointers to spring connection lists
+       int *springs_jj;  // ACQ
+
+
+in rebound.h struct reb_display_data now has
+    unsigned int spring_shader_mvp_location; // ACQ added !!!!
+    unsigned int spring_shader_program;
+    unsigned int spring_shader_color_location;
+    unsigned int spring_shader_particle_vao;
+    unsigned int spring_shader_vertex_count;
+
+    int springsd;    /**< show springs or not  ACQ */
+    int rot;    /**< rotational frame for display ACQ  */
+    struct reb_particle_opengl* springs_v_data; // ACQ spring vertex data
+
+
+actual display function in display.c
+ reb_display(GLFWwindow* window){
+but window contains data which is a reb_display_data structure
+
+in reb_display_init  initialize the reb_display_data structure
+    data->NS =0; //ACQ
+    data->springsd =0; //ACQ
+    data->rot =0; //ACQ
+
+The difference between r_copy and r is whether simulation
+is updated or not, display is not changing particle locations
+
+
+reb_display_prepare_data now loads up the springs_v_data array
+that contains all vertices connected by springs, in pairs
+
+
+in this routine I realloc the springs_v_data array
+reb_display_copy_data
+
+in maind display loop in display init
+       glBindBuffer(GL_ARRAY_BUFFER, spring_particle_buffer); // ACQ
+       glBufferSubData(GL_ARRAY_BUFFER, 0, data->r_copy->NS*2*sizeof(struct reb_particle_opengl), data->springs_v_data); // ACQ
+
+
+
