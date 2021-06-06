@@ -1,0 +1,16 @@
+a 1.000
+b 1.000
+c 1.000
+spin period 31.415927
+Youngs_modulus 2.823366
+Youngs_modulus_big 2.325926
+mush_distance 0.3450
+mean_L 0.2619
+relaxation_time 7.458e-03
+resbody_mm 0.045
+resbody_period 140.50
+barchi 0.0023
+posc 20.231969
+N 839
+NS 10151
+NS/N 12.1

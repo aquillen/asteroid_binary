@@ -419,6 +419,7 @@ void rand_football_from_sphere(struct reb_simulation* r, double dist,
        double ax, double by, double cz, double total_mass)
 {
    double rhold = ax + 2*dist;  // size of sphere that we need to hold everything
+// note we assume here ax is the largest axis ratio
    struct reb_particle pt;
    int npart = (int)(40.0*pow(2.0*rhold/dist,3.0)); 
        // guess for number of random particles we need to generate
@@ -488,6 +489,7 @@ void rand_football_from_sphere(struct reb_simulation* r, double dist,
 // fill particles within a football shape given by semi- axes ax, by, cz
 // spacing set by parameter dist: no closer particles allowed
 // centered at origin
+// ax,by,cz need not be in order of size
 void rand_football(struct reb_simulation* const r, double dist, 
        double ax, double by, double cz, double total_mass)
 {
@@ -2215,22 +2217,24 @@ void eigenvecs(double Cxx,double Cyy,double Czz,double Cxy, double Cyz, double C
 
 // rotate the body so that z is along biggest eigenvalue, x along smallest!
 // seems to work!
-void rotate_to_principal(struct reb_simulation* const r, int il, int ih)
+// return moments of inertia matrix eigenvalues
+void rotate_to_principal(struct reb_simulation* const r, int il, int ih, 
+  double *ee1,double *ee2, double *ee3)
 {
    double Ixx,Iyy,Izz,Ixy,Iyz,Ixz;
    mom_inertia(r,il,ih, &Ixx, &Iyy, &Izz,&Ixy, &Iyz, &Ixz); // get moment of inertial matrix
-   printf("I matrix %.3f %.3f %.3f %.3f %.3f %.3f\n",Ixx,Iyy,Izz,Ixy,Iyz,Ixz);
+   // printf("I matrix %.6f %.6f %.6f %.6f %.6f %.6f\n",Ixx,Iyy,Izz,Ixy,Iyz,Ixz);
    double eig1,eig2,eig3;
    eigenvalues(Ixx,Iyy,Izz,Ixy,Iyz,Ixz, &eig1, &eig2, &eig3);
-   printf("I eigenvalues %.3f %.3f %.3f\n",eig1,eig2,eig3);
+   // printf("I eigenvalues %.6f %.6f %.6f\n",eig1,eig2,eig3);
 
    double ex1,ey1,ez1, ex2,ey2,ez2,ex3,ey3,ez3;
    eigenvecs(Ixx,Iyy,Izz,Ixy,Iyz,Ixz,eig3,&ex1,&ey1,&ez1); // note order eig3 here
-   printf("evec1 %.3f %.3f %.3f\n",ex1,ey1,ez1);
+   // printf("evec1 %.3f %.3f %.3f\n",ex1,ey1,ez1);
    eigenvecs(Ixx,Iyy,Izz,Ixy,Iyz,Ixz,eig2,&ex2,&ey2,&ez2);
-   printf("evec2 %.3f %.3f %.3f\n",ex2,ey2,ez2);
+   // printf("evec2 %.3f %.3f %.3f\n",ex2,ey2,ez2);
    eigenvecs(Ixx,Iyy,Izz,Ixy,Iyz,Ixz,eig1,&ex3,&ey3,&ez3);  // eig1 here
-   printf("evec3 %.3f %.3f %.3f\n",ex3,ey3,ez3);
+   // printf("evec3 %.3f %.3f %.3f\n",ex3,ey3,ez3);
 
 
    struct reb_particle* particles = r->particles;
@@ -2261,9 +2265,12 @@ void rotate_to_principal(struct reb_simulation* const r, int il, int ih)
    }
 
    mom_inertia(r,il,ih, &Ixx, &Iyy, &Izz,&Ixy, &Iyz, &Ixz); // get moment of inertial matrix
-   printf("I matrix %.3f %.3f %.3f %.3f %.3f %.3f\n",Ixx,Iyy,Izz,Ixy,Iyz,Ixz);
+   // printf("I matrix %.6f %.6f %.6f %.6f %.6f %.6f\n",Ixx,Iyy,Izz,Ixy,Iyz,Ixz);
    eigenvalues(Ixx,Iyy,Izz,Ixy,Iyz,Ixz, &eig1, &eig2, &eig3);
-   printf("I eigenvalues %.3f %.3f %.3f\n",eig1,eig2,eig3);
+   printf("I eigenvalues %.6f %.6f %.6f\n",eig1,eig2,eig3);
+   *ee1 = eig1;
+   *ee2 = eig2;
+   *ee3 = eig3;
 
 }
 

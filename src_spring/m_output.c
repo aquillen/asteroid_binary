@@ -48,7 +48,7 @@ void print_extended(struct reb_simulation* const r, int il, int ih, char* filena
 {
    FILE *fpo;
    if (isfirst==1){
-     fpo = fopen(filename, "w");
+     fpo = fopen(filename, "w"); // first time create file
      fprintf(fpo,"# t x y z vx vy vz omx omy omz llx lly llz Ixx Iyy Izz Ixy Iyz Ixz KErot PEspr PEgrav Etot dEdtnow\n");
    }
    else {
@@ -382,7 +382,7 @@ void read_springs(struct reb_simulation* const r,char *fileroot, int index){
 }
 
 
-void read_particles(struct reb_simulation* const r,char *fileroot, int index){
+void  read_particles(struct reb_simulation* const r,char *fileroot, int index){
    char filename[100];
    char istring[100]; 
    toistring(istring, index);
@@ -396,6 +396,12 @@ void read_particles(struct reb_simulation* const r,char *fileroot, int index){
    char string[300];
    struct reb_particle pt;
    pt.ax = 0.0; pt.ay = 0.0; pt.az = 0.0;
+
+   fgets(string,300,fpi); // read in time
+   double t_dump;
+   sscanf(string,"%lf",&t_dump);
+   r->t = t_dump;  // set time
+
    double x,y,z,vx,vy,vz,m,rad;
    while(fgets(string,300,fpi) != NULL){
       sscanf(string,"%lf %lf %lf %lf %lf %lf %lf %lf\n",
@@ -407,6 +413,7 @@ void read_particles(struct reb_simulation* const r,char *fileroot, int index){
    }
    fclose(fpi);
    printf("read_particles: N=%d\n",r->N);
+
 }
 
 void write_particles(struct reb_simulation* const r,char *fileroot, int index){
@@ -419,6 +426,7 @@ void write_particles(struct reb_simulation* const r,char *fileroot, int index){
    strcat(filename,istring);
    strcat(filename,"_particles.txt");
    fpo = fopen(filename,"w");
+   fprintf(fpo,"%.6f\n",r->t); // print time
    for(int i=0;i< r->N;i++){
       fprintf(fpo,"%.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6e\n",
         r->particles[i].x, r->particles[i].y, r->particles[i].z,

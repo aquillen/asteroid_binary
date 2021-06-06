@@ -6,8 +6,8 @@ c1      froot        # fileroot for outputs
 3.0     gamma_fac    # how much higher is gamma damping initially? 
 10.0    t_damp       # time to switch damping
 1       seed         # if 1 then use time of day otherwise use to seed random number generator
--1.0e-6 0.0   0.0    # itaua,itaue,itmig (exp decay) for orbital drifts
- 4.0  0.00 0.00  0.0  0.0  0.05    #  aa,ee,ii,longnode,argperi,meananom : orbital elements
+ 2.0e-5 0.0   0.0    # itaua,itaue,itmig (exp decay) for orbital drifts
+ 3.0  0.00 0.00  0.0  0.0  0.05    #  aa,ee,ii,longnode,argperi,meananom : orbital elements
 ################# first resolved body
 1.0     mball_1      # total mass
 1.0     r_vol_1      # volume equiv radius

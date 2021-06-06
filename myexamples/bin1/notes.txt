@@ -2,3 +2,5 @@ mass ratio 0.1
 
 a1 : bare tidal semi=3
 b1 : inward migration BYORP itaua=-2.0e-5 semi=4
+c1 : outward migration BYORP/tide itaua=2.0e-5 semi=4
+d1 : spin down of primary -3.0e-5 =alphaz_1   
