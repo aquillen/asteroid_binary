@@ -1,0 +1,42 @@
+git init  
+#in the home directory of repository
+
+git config --global user.name "aquillen"
+git config --global user.email "alice.quillen@gmail.com"
+
+#I added a bunch of files with 
+git add **files**
+#then did this 
+git commit -m "try"
+#or
+git commit -m "first commit"
+
+#If you are doing the first time on github, now you need to set up a repository there 
+
+#then I did this
+git remote add origin https://github.com/aquillen/asteroid_binary.git
+
+#then this
+git pull https://github.com/aquillen/asteroid_binary.git  --allow-unrelated-histories 
+# this will pull the README and liscence
+
+#then this?
+git push -u origin main 
+# this seems to be required for internet site to know about latest commits
+
+# I had git push -u origin master and then I had to merge it on github
+# to main for some reason
+
+
+###########
+
+#recipe: edit, add, commit, push
+git status #to see what things look like
+
+#I think editing with command line and then commiting and then updating
+#with the push -
+
+#to check stuff try:  git status
+
+#Also see this:
+#https://product.hubspot.com/blog/git-and-github-tutorial-for-beginners

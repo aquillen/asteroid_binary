@@ -662,6 +662,7 @@ double add_twores_bin(struct reb_simulation* const r,
 // exert an angular acceleration on it about center of mass
 // alphax,alphay,alphaz, is the angular acceleration 
 // does not change center of mass coordinates or velocity
+// for each particle dv = (r cross alpha) *dt
 void drift_spin(struct reb_simulation* const r, double tstep, int il, int ih,
       double alphax, double alphay, double alphaz){
    double xc,yc,zc;

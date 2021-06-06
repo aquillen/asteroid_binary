@@ -1,0 +1,18 @@
+a_1 1.035
+b_1 0.983
+c_1 0.983
+a_2 0.268
+b_2 0.215
+c_2 0.161
+spin period body 1 7.853982
+spin period body 2 17.699114
+orbital period  17.683335
+mean motion  0.355317
+N_1 102
+N_2 36
+NS_1 1116
+NS_2 314
+NS_1/N_1 10.9
+NS_2/N_2 8.7
+Young's modulus body 1 15.94
+Young's modulus body 2 4.55

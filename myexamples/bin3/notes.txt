@@ -1,0 +1,15 @@
+restarts now should work plan:
+-r 
+ flag means restart and continue from last data dump output
+ that means we remove end of output files and write over them
+ keep the same froot 
+ restart_froot is not used
+ continue in time
+
+-s 
+ means use an restart_froot string that is given in parm file to load in 
+ the masses and springs and indices from the _run file
+ this uses restart_froot which is listed in parm file
+ set the time to zero and run with parameters in the parm file
+ with the new froot from the parm file on command line
+ no _run file is created, you need to use the old one!

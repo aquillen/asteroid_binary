@@ -1,0 +1,32 @@
+d1      froot        # fileroot for outputs
+################### globals
+0.005   dt           # timestep for integration
+2e5     tmax         # integrate to this time and then stop
+10.0    t_print      # printing outputs timesteps
+3.0     gamma_fac    # how much higher is gamma damping initially? 
+10.0    t_damp       # time to switch damping
+1       seed         # if 1 then use time of day otherwise use to seed random number generator
+-0.0e-6 0.0   0.0    # itaua,itaue,itmig (exp decay) for orbital drifts
+ 3.0  0.00 0.00  0.0  0.0  0.05    #  aa,ee,ii,longnode,argperi,meananom : orbital elements
+################# first resolved body
+1.0     mball_1      # total mass
+1.0     r_vol_1      # volume equiv radius
+0.35    b_distance   # min interparticle distance
+2.4     mush_fac_1   # sets max spring length
+1.5e-1  ks_1         # spring constant
+0.30    gamma_1      # spring damping final
+0.8 0.6  ratio1,ratio2 # axis ratios for body b/a, c/a
+0.80    omegaz_1     # initial body spin
+ 0.0    obliquity_1  # obliquity degrees
+-3.0e-5  alphaz_1     # spin drift rate z axis
+################ second resolved body
+0.1     mball_2      # total mass
+0.46    r_vol_2      # volume equiv radius
+0.21    b_distance_2 # min interparticle distance
+2.4     mush_fac_2   # sets max spring length
+1.5e-1  ks_2         # spring constant
+0.30    gamma_2      # spring damping final
+0.7 0.5  ratio1,ratio2 # axis ratios for body b/a, c/a
+0.20    omegaz_2     # initial body spin
+ 0.0    obliquity_2  # obliquity degrees
+0.0     alphaz_2     # spin drift rate z axis 

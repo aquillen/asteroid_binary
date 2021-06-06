@@ -170,6 +170,7 @@ void print_heat();
 void read_particles();
 void write_particles();
 void write_springs();
+void read_springs();
 void toistring();
 void zero_accel();
 void invI();
