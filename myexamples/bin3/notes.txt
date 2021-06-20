@@ -13,3 +13,6 @@ restarts now should work plan:
  set the time to zero and run with parameters in the parm file
  with the new froot from the parm file on command line
  no _run file is created, you need to use the old one!
+
+
+a1 is the one that I temporarily put in the draft 
