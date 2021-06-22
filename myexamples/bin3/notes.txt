@@ -6,6 +6,8 @@ restarts now should work plan:
  restart_froot is not used
  continue in time
 
+you want to use the same parameter file but increase the tmax
+
 -s 
  means use an restart_froot string that is given in parm file to load in 
  the masses and springs and indices from the _run file
