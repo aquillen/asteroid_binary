@@ -80,7 +80,7 @@ def read_two_bodies(simdir,froot,GM):
     # angular momentum unit vectors
     nlx1 = llx1[0:ns]/ll1; nly1 = lly1[0:ns]/ll1; nlz1 = llz1[0:ns]/ll1;
     nlx2 = llx2[0:ns]/ll2; nly2 = lly2[0:ns]/ll2; nlz2 = llz2[0:ns]/ll2;
-    # compute obliquities
+    # compute obliquities, angle between orbit normal and body angular momentum
     ang_so1 = dotprod(nlx1,nly1,nlz1,no_x,no_y,no_z)
     ang_so1 = np.arccos(ang_so1)*angfac # obliquity body 1 in degrees
     ang_so2 = dotprod(nlx2,nly2,nlz2,no_x,no_y,no_z)
@@ -91,7 +91,49 @@ def read_two_bodies(simdir,froot,GM):
     #compute mean motion of binary
     meanmotion = np.sqrt(GM)/aaarr**1.5
     
+    # compute a libration angle
+    # compute the angle between the body principal major axis,
+    #    projected onto the orbital plane
+    #    and the direction to the binary
+    # dx,dy,dz is to secondary from primary
+    
+    dr  = np.sqrt(dx**2 + dy**2 * dx**2)  # distance between 2 bodies
+    dx_hat = dx/dr # normalized direction between primary and secondary
+    dy_hat = dy/dr
+    dz_hat = dz/dr
+    a_x,a_y,a_z = crossprod_unit(no_x,no_y,no_z,dx_hat,dy_hat,dz_hat)
+    # this is a vector in orbit plane that is perpendicular to orbit
+    # normal and perpendicular to dr_hat direction between primary and secondary
+    lib_angle = om1*0.0 # to store the libration angle
+    for k in range(ns):  # vmin corresponds to long axis of body, vmax to shortest axis
+        # eigenvectors are body orientation axes
+       vmax,vmin,vmed = evec(k,Ixx,Iyy,Izz,Ixy,Iyz,Ixz)
+       
+       orbit_x = dotprod(dx_hat[k],dy_hat[k],dz_hat[k],vmin[0],vmin[1],vmin[2])
+       orbit_y = dotprod(a_x[k],a_y[k],a_z[k],vmin[0],vmin[1],vmin[2])
+       lib_angle[k] = np.arctan2(orbit_y,orbit_x)
+       # to project vmin onto orbit plane we could use nhat x (vmin x nhat)
+       # where (no_x,no_y,no_z) = nhat is the orbit normal
+    
     return tarr,aaarr,eearr,iiarr,lnarr,ararr,maarr,om1,om2,\
-        obliquity_deg1,obliquity_deg2,meanmotion
+        obliquity_deg1,obliquity_deg2,meanmotion, lib_angle
     
     
+# at index j from moments of inertia arrays
+# return eigenvector of max eigen value
+#    and eigenvector of min eigen value
+#    and eigenvector of middle eigen value
+# should now work if some eigenvalues are same as others
+# these are the principal body axes
+def evec(j,Ixx,Iyy,Izz,Ixy,Iyz,Ixz):
+    Imat = np.matrix([[Ixx[j],Ixy[j],Ixz[j]],\
+         [Ixy[j],Iyy[j],Iyz[j]],[Ixz[j],Iyz[j],Izz[j]]])
+    w, v = LA.eig(Imat)  # eigenvecs v are unit length
+    jsort = np.argsort(w) # arguments of a sorted array of eigenvalues
+    jmax = jsort[2]  # index of maximum eigenvalue
+    jmin = jsort[0]  # index of minimum eigenvalue
+    jmed = jsort[1]  # index of middle  eigenvalue
+    vmax = np.squeeze(np.asarray(v[:,jmax]))   # corresponding eigenvector
+    vmin = np.squeeze(np.asarray(v[:,jmin]))   # corresponding eigenvector
+    vmed = np.squeeze(np.asarray(v[:,jmed]))   # corresponding eigenvector
+    return vmax,vmin,vmed
