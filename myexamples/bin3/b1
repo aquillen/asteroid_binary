@@ -1,13 +1,13 @@
 b1      froot        # fileroot for outputs
 ################### globals
 0.002   dt           # timestep for integration
-2e5     tmax         # integrate to this time and then stop
+4e5     tmax         # integrate to this time and then stop
 10.0    t_print      # printing outputs timesteps
 2000.0  t_datadump   # printing masses and spring outputs for restarts at this inverval
 1.0     gamma_fac    # how much higher is gamma damping initially? 
 1.0     t_damp       # time to switch damping
-1       seed         # if 1 then use time of day otherwise use to seed random number generator
-a1     restart_froot # froot for restart files
+4       seed         # if 1 then use time of day otherwise use to seed random number generator
+r1     restart_froot # froot for restart files
 -0.0e-6 0.0   0.0    # itaua,itaue,itmig (exp decay) for orbital drifts
  3.0  0.00 0.00  0.0  0.0  0.0     #  aa,ee,ii,longnode,argperi,meananom : orbital elements
 ################# first resolved body
@@ -29,6 +29,6 @@ a1     restart_froot # froot for restart files
 3.0e-2  ks_2         # spring constant
 30.00   gamma_2      # spring damping final
 0.8 0.7  ratio1,ratio2 # axis ratios for body b/a, c/a
-0.40    omegaz_2     # initial body spin
+0.50    omegaz_2     # initial body spin
  0.0    obliquity_2  # obliquity degrees
 0.0     alphaz_2     # spin drift rate z axis 
