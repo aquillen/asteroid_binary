@@ -17,4 +17,7 @@ you want to use the same parameter file but increase the tmax
  no _run file is created, you need to use the old one!
 
 
-a1 is the one that I temporarily put in the draft 
+a1 is the one that I temporarily put in the draft   seed=1
+b1 is the one that I temporarily put in the draft   seed=4
+
+both are run to 4e5 and have backups at 2e5
