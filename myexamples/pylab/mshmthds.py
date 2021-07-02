@@ -73,3 +73,7 @@ def cor_volume(mesh):
 def nf_mesh(mesh):
     f = mesh.faces
     print('number of faces ',len(f))
+    
+def get_nf_mesh(mesh):
+    f = mesh.faces
+    return len(f)
