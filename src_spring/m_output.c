@@ -59,19 +59,19 @@ void print_extended(struct reb_simulation* const r, int il, int ih, char* filena
    compute_com(r,il, ih, &xc, &yc, &zc);
    double vxc =0.0; double vyc =0.0; double vzc =0.0;
    compute_cov(r,il, ih, &vxc, &vyc, &vzc);
-   fprintf(fpo,"%.5f %.5f %.5f ",xc,yc,zc);
-   fprintf(fpo,"%.5f %.5f %.5f ",vxc,vyc,vzc);
+   fprintf(fpo,"%.6f %.6f %.6f ",xc,yc,zc);
+   fprintf(fpo,"%.6f %.6f %.6f ",vxc,vyc,vzc);
 
    double omx,omy,omz, Ibig, Imid, Ismall, llx,lly,llz;
    // computes omega using inverse of moment of inertia matrix and angular momentum
    body_spin(r, il, ih, &omx, &omy, &omz, &Ibig, &Imid, &Ismall);
    measure_L(r,il, ih, &llx, &lly, &llz); // computes spin angular momentum of spining body
-   fprintf(fpo,"%.4e %.4e %.4e ",omx, omy, omz);
-   fprintf(fpo,"%.4e %.4e %.4e ",llx,lly,llz);
-   // fprintf(fpo,"%.4e %.4e %.4e ",Ibig, Imid, Ismall);
+   fprintf(fpo,"%.6e %.6e %.6e ",omx, omy, omz);
+   fprintf(fpo,"%.6e %.6e %.6e ",llx,lly,llz);
+   // fprintf(fpo,"%.6e %.6e %.6e ",Ibig, Imid, Ismall);
    double Ixx,Iyy,Izz,Ixy,Iyz,Ixz;
    mom_inertia(r,il,ih, &Ixx, &Iyy, &Izz,&Ixy, &Iyz, &Ixz);
-   fprintf(fpo,"%.5f %.5f %.5f %.5f %.5f %.5f ",Ixx,Iyy,Izz,Ixy,Iyz,Ixz);
+   fprintf(fpo,"%.6e %.6e %.6e %.6e %.6e %.6e ",Ixx,Iyy,Izz,Ixy,Iyz,Ixz);
 
    double KErot = compute_rot_kin(r,il,ih); // total kinetic energy (including rotational)
    double pe_springs = spring_potential_energy(r); // potential energy in springs
