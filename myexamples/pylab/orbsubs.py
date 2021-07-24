@@ -12,6 +12,7 @@ from math import fmod
 from scipy.signal import medfilt
 from scipy.signal import savgol_filter
 
+import quaternion 
 
 from kepcart import *
 from outils import * # useful short routines
@@ -19,7 +20,7 @@ from outils import * # useful short routines
 angfac = 180.0/np.pi # for converting radians to degrees
 twopi = np.pi*2.0
 
-# read in an extended mass output file format fileroot_ext.txt
+# read in an extended mass output file format fileroot_ext_1.txt
 def readresfile(fileroot,ibody):
     filename = fileroot+'_ext'
     if (ibody > 0):
@@ -31,7 +32,81 @@ def readresfile(fileroot,ibody):
         np.loadtxt(filename, skiprows=1, unpack='true')
     return t,x,y,z,vx,vy,vz,omx,omy,omz,llx,lly,llz,Ixx,Iyy,Izz,Ixy,Iyz,Ixz,\
         KErot,PEspr,PEgrav,Etot,dEdtnow
-
+        
+# read in a covariance matrix output file formate fileroot_cov_1.txt
+# for an extended body
+def readcovarfile(fileroot,ibody):
+    filename = fileroot+'_cov'
+    if (ibody > 0):
+        filename = filename + '_{:0d}'.format(ibody)
+    filename = filename + '.txt'
+    # t C_xx C_xy C_xz C_yx C_yy C_yz C_zx C_zy C_zz
+    t,C_xx,C_xy,C_xz,C_yx,C_yy,C_yz,C_zx,C_zy,C_zz =\
+            np.loadtxt(filename, skiprows=1, unpack='true')
+    return t,C_xx,C_xy,C_xz,C_yx,C_yy,C_yz,C_zx,C_zy,C_zz
+    
+# find the rotation matrix using signular value decoposition at a single index
+# following this https://en.wikipedia.org/wiki/Kabsch_algorithm
+# Kabsch W., 1976, A solution for the best rotation to relate two sets of vectors, Acta
+# Crystallographica, A32:922-923, doi: http://dx.doi.org/10.1107/S0567739476001873 for quaturnion form https://cnx.org/contents/HV-RsdwL@23/Molecular-Distance-Measures
+#Berthold K. P. Horn. (1986). Closed-form solution of absolute orientation using unit quaternions. Journal of the Optical Society of America, 4:629-642.
+# E. A. Coutsias and C. Seok and K. A. Dill. (2004). Using quaternions to calculate RMSD. Journal of Computational Chemistry, 25, 1849-1857.
+# here cxx, cxy etc are parts of the covariance matrix
+# return both rotation matrix and quaternion
+def quatrot_1(cxx,cxy,cxz,cyx,cyy,cyz,czx,czy,czz):
+    Cmatrix = np.array([\
+        [cxx,cxy,cxz],\
+        [cyx,cyy,cyz],\
+        [czx,czy,czz]])
+    U,S,VT = np.linalg.svd(Cmatrix)  #VT is V transpose
+    V = np.transpose(VT)
+    UT =np.transpose(U)
+    C = np.matmul(V,UT)
+    d = np.sign(np.linalg.det(C))
+    d_diag = np.diag(np.array([1.,1.,d]))
+    B = np.matmul(d_diag,UT)
+    R = np.matmul(V,B)  # is the rotation matrix, is a 2d array
+   # Following https://www.osapublishing.org/view_article.cfm?gotourl=https%3A%2F%2Fwww%2Eosapublishing%2Eorg%2FDirectPDFAccess%2FB207B087%2DD005%2D40BB%2DAF62ADCF22E6EF4F%5F2711%2Fjosaa%2D4%2D4%2D629%2Epdf%3Fda%3D1%26id%3D2711%26seq%3D0%26mobile%3Dno&org=University%20of%20Rochester
+    Nmatrix =np.array([\
+        [cxx+cyy+czz,cyz-czy    ,czx-cxz     ,cxy-cyx],\
+        [cyz-czy    ,cxx-cyy-czz,cxy+cyx     ,czx+cxz],\
+        [czx-cxz    , cxy+cyx   ,-cxx+cyy-czz,cyz+czy],\
+        [cxy-cyx    , czx+cxz   ,cyz+czy     ,-cxx-cyy+czz]])
+    w, v = np.linalg.eig(Nmatrix)  # eigenvecs v are unit length
+    jsort = np.argsort(w) # arguments/indices of a sorted array of eigenvalues,  low to high
+    jmax = jsort[3]  # index of maximum eigenvalue
+    vmax = np.squeeze(np.asarray(v[:,jmax]))   # corresponding eigenvector
+    q = np.quaternion(vmax[0],vmax[1],vmax[2],vmax[3])
+    return R,q  # return rotation matrix and quaternion, they should be consistent? they are!
+    #xyz2b = quaternion.rotate_vectors(q,xyz1) rotate first
+    # point set to get the second
+ 
+# compute quaturnion and rotate for a vector of covariance matrices
+# at index i
+def quatrot_i(C_xx,C_xy,C_xz,C_yx,C_yy,C_yz,C_zx,C_zy,C_zz,i):
+    cxx = C_xx[i]; cxy = C_xy[i]; cxz = C_xz[i]
+    cyx = C_yx[i]; cyy = C_yy[i]; cyz = C_yz[i]
+    czx = C_zx[i]; czy = C_zy[i]; czz = C_zz[i]
+    R,q   = quatrot_1(cxx,cxy,cxz,cyx,cyy,cyz,czx,czy,czz)
+    return R,q
+  
+# comput covariance matrix from 2 lists of points
+def compute_covar(x1,y1,z1,x2,y2,z2):
+    Cxx = np.sum(x1*x2); Cxy = np.sum(x1*y2); Cxz = np.sum(x1*z2);
+    Cyx = np.sum(y1*x2); Cyy = np.sum(y1*y2); Cyz = np.sum(y1*z2);
+    Czx = np.sum(z1*x2); Czy = np.sum(z1*y2); Czz = np.sum(z1*z2);
+    return  Cxx,Cxy,Cxz,Cyx,Cyy,Cyz,Czx,Czy,Czz
+ 
+# make a vector of quaturnion rotations from the covar arrays
+def quatrot_vec(C_xx,C_xy,C_xz,C_yx,C_yy,C_yz,C_zx,C_zy,C_zz):
+    npp=len(C_xx)
+    junk = np.zeros((npp,4))
+    qarr = quaternion.as_quat_array(junk)
+    for i in range(npp):
+        R,q=quatrot_i(C_xx,C_xy,C_xz,C_yx,C_yy,C_yz,C_zx,C_zy,C_zz,i)
+        qarr[i] = q
+    return qarr  # an array of quaturnions
+    
 
 # read in numerical simulation output for two resolved bodies
 # return spins, orbital elements and obliquities
@@ -213,3 +288,32 @@ def evec(j,Ixx,Iyy,Izz,Ixy,Iyz,Ixz):
     vmin = np.squeeze(np.asarray(v[:,jmin]))   # corresponding eigenvector
     vmed = np.squeeze(np.asarray(v[:,jmed]))   # corresponding eigenvector
     return vmax,vmin,vmed
+    
+    
+# axis ratios from moments of inertia
+#I1>I2>I3
+def print_axis_ratios(I1,I2,I3):
+    a_p = np.sqrt( (5.0/2.0)*(I1 + I2 - I3) )  #long body associated with I3
+    c_p = np.sqrt( (5.0/2.0)*(I2 + I3 - I1) )
+    b_p = np.sqrt( (5.0/2.0)*(I3 + I1 - I2) )
+    print('a,b,c= {:.3f} {:.3f} {:.3f}'.format(a_p,b_p,c_p))
+    print('b/a = {:.3f}, c/a = {:.3f}'.format(b_p/a_p, c_p/a_p))
+    # real axis ratios of primary
+    
+# precession rate of secondary
+#I1>I2>I3 C=I1, B=I2 A=I1  short axis is biggest moment of inertia  C>B>A
+def alpha_s(I1,I2,I3):
+    C=I1; B=I2; A=I1
+    als = 1.5*(I1 -  0.5*(I2+I3))/I1
+    als_big = 1.5*(I1 - I3)/I1  # don't average!
+    print('alpha_s/n_B =  {:.3f}, {:.3f},'.format(als,als_big))
+    return als,als_big
+
+    
+#libration frequency of secondary
+def omega_lib(I1,I2,I3):
+    oml = np.sqrt(3*(I2-I3)/I1)  # \sqrt{3(B-A)/C}
+    print('omega_lib/n_B = {:.3f}'.format(oml))
+    return oml
+          
+
