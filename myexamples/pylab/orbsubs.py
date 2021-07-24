@@ -35,6 +35,8 @@ def readresfile(fileroot,ibody):
         
 # read in a covariance matrix output file formate fileroot_cov_1.txt
 # for an extended body
+# return covariance matrix with convention
+#   C_xy = np.sum(x_initial * y_current)
 def readcovarfile(fileroot,ibody):
     filename = fileroot+'_cov'
     if (ibody > 0):
@@ -43,9 +45,17 @@ def readcovarfile(fileroot,ibody):
     # t C_xx C_xy C_xz C_yx C_yy C_yz C_zx C_zy C_zz
     t,C_xx,C_xy,C_xz,C_yx,C_yy,C_yz,C_zx,C_zy,C_zz =\
             np.loadtxt(filename, skiprows=1, unpack='true')
-    return t,C_xx,C_xy,C_xz,C_yx,C_yy,C_yz,C_zx,C_zy,C_zz
+            # our m_output file does order
+            # C_xy = sum x_current*y_initial which is backwards
+    # reverse the order!
+    cxy = C_yx; cyx = C_xy
+    cxz = C_zx; czx = C_xz
+    cyz = C_zy; czy = C_yz # reverse the convention!
+    cxx = C_xx; cyy = C_yy; czz = C_zz
+    #return t,C_xx,C_xy,C_xz,C_yx,C_yy,C_yz,C_zx,C_zy,C_zz
+    return t,cxx,cxy,cxz,cyx,cyy,cyz,czx,czy,czz
     
-# find the rotation matrix using signular value decoposition at a single index
+# find the rotation matrix using signular value decomposition at a single index
 # following this https://en.wikipedia.org/wiki/Kabsch_algorithm
 # Kabsch W., 1976, A solution for the best rotation to relate two sets of vectors, Acta
 # Crystallographica, A32:922-923, doi: http://dx.doi.org/10.1107/S0567739476001873 for quaturnion form https://cnx.org/contents/HV-RsdwL@23/Molecular-Distance-Measures
@@ -53,6 +63,7 @@ def readcovarfile(fileroot,ibody):
 # E. A. Coutsias and C. Seok and K. A. Dill. (2004). Using quaternions to calculate RMSD. Journal of Computational Chemistry, 25, 1849-1857.
 # here cxx, cxy etc are parts of the covariance matrix
 # return both rotation matrix and quaternion
+# the convention for  cxy is np.sum(x_initial*y_final)
 def quatrot_1(cxx,cxy,cxz,cyx,cyy,cyz,czx,czy,czz):
     Cmatrix = np.array([\
         [cxx,cxy,cxz],\
@@ -78,8 +89,9 @@ def quatrot_1(cxx,cxy,cxz,cyx,cyy,cyz,czx,czy,czz):
     vmax = np.squeeze(np.asarray(v[:,jmax]))   # corresponding eigenvector
     q = np.quaternion(vmax[0],vmax[1],vmax[2],vmax[3])
     return R,q  # return rotation matrix and quaternion, they should be consistent? they are!
-    #xyz2b = quaternion.rotate_vectors(q,xyz1) rotate first
-    # point set to get the second
+    # convention:
+    # xyz2b = quaternion.rotate_vectors(q,xyz1) rotate first
+    # point set by q to get the second set of points
  
 # compute quaturnion and rotate for a vector of covariance matrices
 # at index i
