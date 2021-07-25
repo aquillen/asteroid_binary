@@ -116,6 +116,7 @@ void adjust_mass_abc();
 void subtractcov();
 void subtractcom();
 void print_extended();
+void print_covar();
 void print_extended_simp();
 void print_extended_2nodes();
 void print_pm();
