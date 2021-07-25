@@ -38,7 +38,9 @@ double *x0_arr,*y0_arr,*z0_arr; // for storing in initial particle positions
 
 void heartbeat(struct reb_simulation* const r);
 void del_ends();
-void store_xyz0();
+void store_xyz0(); // for storing bodies particle positions in a principal axis states
+void sub_com_xyz0();
+void read_xyz0();
 
 int il1,ih1,il2,ih2;  // indices of the two resolved bodies, start and end
 static int firstb=0;  // now global for restarts
@@ -339,6 +341,7 @@ int main(int argc, char* argv[]){
       read_particles(r,froot_in, 0); // read in particles, sets time
       read_springs(r,froot_in, 0);  // read in springs
 
+
       // get the indices for the two extended bodies in the _run file
       FILE *fpi;
       char fname[200];
@@ -350,6 +353,18 @@ int main(int argc, char* argv[]){
       fgets(istring,300,fpi);
       sscanf(istring,"%s %s %d %d",junk1,junk2,&il2,&ih2);
       // printf("%d %d %d %d\n",il1,ih1,il2,ih2);
+
+      char initfile[50]; 
+      sprintf(initfile,"%s_init",froot_in); // read in the body positions initial w. principal axis orientation
+      toistring(istring, 0);
+      strcpy(initfile,froot_in);
+      strcat(initfile,"_");
+      strcat(initfile,istring);
+      strcat(initfile,"_particles.txt");
+
+      read_xyz0(r,initfile);
+      sub_com_xyz0(il1, ih1); // subtract centers of mass from initial positions
+      sub_com_xyz0(il2, ih2);
 
 
       if (r->N ==0){
@@ -376,6 +391,15 @@ int main(int argc, char* argv[]){
       }
       // exit(0);
    }
+   else { // we are not doing a restart  
+      char initfile[50];
+      sprintf(initfile,"%s_init",froot);
+      write_particles(r,initfile, 0); // save initial particle positions in a special file
+      // these should have bodies w. principal axis orientation!
+      store_xyz0(r); // store initial conditions
+      sub_com_xyz0(il1, ih1); // subtract centers of mass from initial positions
+      sub_com_xyz0(il2, ih2);
+   }
 
 /////////////////////////////// now set up the run
 
@@ -383,7 +407,6 @@ int main(int argc, char* argv[]){
    r->heartbeat = heartbeat;
    // centerbody(r,il1,ih1);  // move reference frame to resolved body 
    centerbody(r,0,r->N);  // move reference frame to center of mass 
-   store_xyz0(r); // store initial conditions
 
    // max integration time
    if (tmax ==0.0)
@@ -442,7 +465,8 @@ void heartbeat(struct reb_simulation* const r){
                // only append to file
                print_extended(r,il1,ih1,extendedfile_1,0); // orbital info and stuff
                print_extended(r,il2,ih2,extendedfile_2,0); 
-               print_covar(r,il1,ih1, x0_arr, y0_arr, z0_arr, covarfile_1,0);
+               // covariance matrix w. initial particle positions
+               print_covar(r,il1,ih1, x0_arr, y0_arr, z0_arr, covarfile_1,0); 
                print_covar(r,il2,ih2, x0_arr, y0_arr, z0_arr, covarfile_2,0);
             }
          }
@@ -510,4 +534,40 @@ void store_xyz0(struct reb_simulation* const r){
    }
 }
    
+// subtract center of mass positions from initial positions
+void sub_com_xyz0(int il, int ih){
+     double xc0=0.0; double yc0=0.0; double zc0=0.0;
+     // first time this is run substract off center of mass from initial particle list
+     for (int i=il;i<ih;i++){
+        xc0 += x0_arr[i]; yc0 += y0_arr[i]; zc0 += z0_arr[i];
+     }
+     xc0 /= (ih-il); // center of mass position
+     yc0 /= (ih-il);
+     zc0 /= (ih-il);
+     for (int i=il;i<ih;i++){
+       x0_arr[i] -= xc0; y0_arr[i] -= yc0; z0_arr[i] -= zc0;
+     }
+}
+
+
+// read in the initial particle positions of oriented body from an old simulation 
+// and put them in the x0_arr, y0_arr,z0_arr arrays
+void read_xyz0(struct reb_simulation* const r, char *filename){
+   printf("read_xyz0: %s\n",filename);
+   x0_arr = malloc(r->N*sizeof(double));
+   y0_arr = malloc(r->N*sizeof(double));
+   z0_arr = malloc(r->N*sizeof(double));
+   FILE *fpi;
+   fpi = fopen(filename,"r");
+   char jstring[300];
+   fgets(jstring,300,fpi); // has time in it
+   double junk=0.0;
+   int i=0;
+   while(fgets(jstring,300,fpi) != NULL){
+      sscanf(jstring,"%lf %lf %lf %lf %lf %lf %lf %lf",
+        x0_arr+i,y0_arr+i,z0_arr+i,&junk,&junk,&junk,&junk,&junk);
+      i++;
+   }
+
+}
 
