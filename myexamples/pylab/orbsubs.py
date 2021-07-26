@@ -139,17 +139,21 @@ def read_two_bodies_new(simdir,froot,GM):
         Etot,dEdtnow = readresfile(fileroot,2)
     # read in covar matrix second resolved body
     tcv2,cxx2,cxy2,cxz2,cyx2,cyy2,cyz2,czx2,czy2,czz2= readcovarfile(fileroot,2)
-    # make quaternion array
+    # make quaternion array of body2
     qarr2 = quatrot_vec(cxx2,cxy2,cxz2,cyx2,cyy2,cyz2,czx2,czy2,czz2)
-    xaxis =  np.array([1,0,0])
-    zaxis =  np.array([0,0,1])
-    xrot2 = quaternion.rotate_vectors(qarr2, xaxis) # long principal axis
-    zrot2 = quaternion.rotate_vectors(qarr2, zaxis) # short principal axis
     
     ns1 = len(t1) # number of timesteps
     ns2 = len(t2)
     ns = min(ns1,ns2)
     tarr = t2[0:ns]
+    qarr2 = qarr2[0:ns]
+    
+    # rotate long and short principal axes of body2
+    xaxis =  np.array([1,0,0])
+    zaxis =  np.array([0,0,1])
+    xrot2 = quaternion.rotate_vectors(qarr2, xaxis) # long principal axis
+    zrot2 = quaternion.rotate_vectors(qarr2, zaxis) # short principal axis
+    
     # relative positions and velocities
     dx = x2[0:ns]-x1[0:ns]; dvx = vx2[0:ns]-vx1[0:ns];
     dy = y2[0:ns]-y1[0:ns]; dvy = vy2[0:ns]-vy1[0:ns];
@@ -265,14 +269,6 @@ def read_two_bodies_new(simdir,froot,GM):
     #oxhat_x,oxhat_y,oxhat_z =crossprod_unit(no_x,no_y,no_z,oyhat_x,oyhat_y,oyhat_z)
     # a unit vector in orbital plane that is perpendicular to oyhat
     
-    #lib_angle2 = om1*0.0 # to store the libration angle
-    phi1 = om1*0.0 # to store orientation angle of primary
-    #phi2 = om1*0.0 # to store orientation angle of secondary
-    theta1_NPA = om1*0.0  # to store NPA angle for body 1
-    #theta2_NPA = om1*0.0  # to store NPA angle for body 2
-    #nprec_ang2= om1*0.0  #  to store short axis angle on xy plane
-    #ntilt2 = om1*0  # store angle between short axis and orbit normal
-    #longtilt2 = om1*0  # store angle between long axis and orbit normal
     
     phi2=np.arctan2(np.squeeze(xrot2[:,1]),np.squeeze(xrot2[:,0])) # secondary long axis angle on xyplane
     nprec_ang2=np.arctan2(np.squeeze(zrot2[:,1]),np.squeeze(zrot2[:,0]))  # secondary short axis projected on xyplane
@@ -280,17 +276,17 @@ def read_two_bodies_new(simdir,froot,GM):
     # angle between secondary short axis and orbit normal body2
     vtilt2 =dotprod(no_x,no_y,no_z, np.squeeze(zrot2[:,0]),\
         np.squeeze(zrot2[:,1]),np.squeeze(zrot2[:,2]))
-    ntilt2 = np.arccos((vtilt2)) # store angle between short axis and orbit normal
+    ntilt2 = np.arccos(vtilt2) # store angle between short axis and orbit normal
     
     # angle between secondary long body axis and orbit plane body2
     ltilt2 =dotprod(no_x,no_y,no_z,np.squeeze(xrot2[:,0]),\
         np.squeeze(xrot2[:,1]),np.squeeze(xrot2[:,2]))
-    longtilt2 = np.arcsin((ltilt2))  # an inclination
+    longtilt2 = np.arcsin(ltilt2)  # an inclination
     
     # NPA angle, short axis and angular mom, body 2
     ctheta_NPA  =dotprod(nlx2,nly2,nlz2,np.squeeze(zrot2[:,0]),\
         np.squeeze(zrot2[:,1]),np.squeeze(zrot2[:,2]))
-    theta2_NPA = np.arccos(np.abs(ctheta_NPA)) # NPA angle, short axis and angular mom
+    theta2_NPA = np.arccos(ctheta_NPA) # NPA angle, short axis and angular mom
     
     # angle between long axis of secondary and direction to primary
     orbit_x = dotprod(dx_hat,dy_hat,dz_hat,np.squeeze(xrot2[:,0]),\
@@ -301,6 +297,9 @@ def read_two_bodies_new(simdir,froot,GM):
     lib_angle2 = np.arctan2(orbit_y,orbit_x)
     # libration angle body 2
     
+       
+    phi1 = om1*0.0 # to store orientation angle of primary
+    theta1_NPA = om1*0.0  # to store NPA angle for body 1
     for k in range(ns):
         # vmin corresponds to long axis of body, vmax to shortest axis
         # eigenvectors are body orientation axes
