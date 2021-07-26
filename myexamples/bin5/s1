@@ -1,9 +1,9 @@
 s1      froot        # fileroot for outputs
 ################### globals
 0.002   dt           # timestep for integration
-1e3     tmax         # integrate to this time and then stop
+1.5e3     tmax         # integrate to this time and then stop
 1.0    t_print      # printing outputs timesteps
-2000.0  t_datadump   # printing masses and spring outputs for restarts at this inverval
+500.0  t_datadump   # printing masses and spring outputs for restarts at this inverval
 1.0     gamma_fac    # how much higher is gamma damping initially? 
 1.0     t_damp       # time to switch damping
 4       seed         # if 1 then use time of day otherwise use to seed random number generator
