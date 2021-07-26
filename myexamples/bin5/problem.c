@@ -359,10 +359,12 @@ int main(int argc, char* argv[]){
       toistring(istring, 0);
       strcpy(initfile,froot_in);
       strcat(initfile,"_");
+      strcat(initfile,"init");
+      strcat(initfile,"_");
       strcat(initfile,istring);
       strcat(initfile,"_particles.txt");
 
-      read_xyz0(r,initfile);
+      read_xyz0(r,initfile); // read in points in principal axis rotation coords
       sub_com_xyz0(il1, ih1); // subtract centers of mass from initial positions
       sub_com_xyz0(il2, ih2);
 
