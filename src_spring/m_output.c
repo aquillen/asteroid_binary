@@ -468,17 +468,18 @@ void print_covar(struct reb_simulation* const r, int il, int ih, double *x0, dou
    if (isfirst==1){
      fpo = fopen(filename, "w"); // first time create file
      fprintf(fpo,"# t C_xx C_xy C_xz C_yx C_yy C_yz C_zx C_zy C_zz \n");
-     double xc0=0.0; double yc0=0.0; double zc0=0.0;
-     // first time this is run substract off center of mass from initial particle list
-     for (int i=il;i<ih;i++){
-        xc0 += x0[i]; yc0 += y0[i]; zc0 += z0[i];
-     }
-     xc0 /= (ih-il); // center of mass position
-     yc0 /= (ih-il);
-     zc0 /= (ih-il);
-     for (int i=il;i<ih;i++){
-       x0[i] -= xc0; y0[i] -= yc0; z0[i] -= zc0;
-     }
+// no longer necessary as can be done in problem.c at the beginning
+//   double xc0=0.0; double yc0=0.0; double zc0=0.0;
+//   // first time this is run substract off center of mass from initial particle list
+//   for (int i=il;i<ih;i++){
+//      xc0 += x0[i]; yc0 += y0[i]; zc0 += z0[i];
+//   }
+//   xc0 /= (ih-il); // center of mass position
+//   yc0 /= (ih-il);
+//   zc0 /= (ih-il);
+//   for (int i=il;i<ih;i++){
+//     x0[i] -= xc0; y0[i] -= yc0; z0[i] -= zc0;
+//   }
    }
    else {
      fpo = fopen(filename, "a");
@@ -494,6 +495,7 @@ void print_covar(struct reb_simulation* const r, int il, int ih, double *x0, dou
       double x = particles[i].x - xc;
       double y = particles[i].y - yc;
       double z = particles[i].z - zc;
+// notice convention here cxy is sum x_current_position *  y_original_position!
       cxx += x*x0[i];
       cxy += x*y0[i];
       cxz += x*z0[i];
