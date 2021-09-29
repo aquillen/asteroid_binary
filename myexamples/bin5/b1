@@ -1,7 +1,7 @@
 b1      froot        # fileroot for outputs
 ################### globals
 0.002   dt           # timestep for integration
-4e5     tmax         # integrate to this time and then stop
+5e5     tmax         # integrate to this time and then stop
 2.0    t_print      # printing outputs timesteps
 2000.0  t_datadump   # printing masses and spring outputs for restarts at this inverval
 1.0     gamma_fac    # how much higher is gamma damping initially? 
