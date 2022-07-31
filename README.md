@@ -4,6 +4,9 @@ Evolution of asteroid binaries using a mass-spring model
 <img title="A simulation of a Binary" alt="Alt text" src="/bin_sim.png" width="500">
 
 This repository is associated with the manuscript at <a href="https://arxiv.org/abs/2107.14789"> arxiv </a>
+and published in the paper 
+<i> Non-principal axis rotation in binary asteroid systems and how it weakens the BYORP effect </i>, Quillen, A. C., LaBarca, A. and Chen, Y.Y., 2022, Icarus, 374, 114826.
+
 
 
 Simulations used in the paper are in myexamples/bin5/
